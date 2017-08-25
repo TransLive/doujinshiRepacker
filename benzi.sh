@@ -57,7 +57,7 @@ function rarExt()
         rarType "$extTmpDir"
         _rarType=$?
         echo $_rarType
-        
+
         #final step
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
         case $_rarType in 
@@ -123,7 +123,7 @@ do
     for f in $FILE
     do
         echo $f
-        zip -r "$rootPath/ex/$dir/$f".zip "$rootPath/ex/$dir/$f"
+        zip -r "$f".zip "$f"
         rm -r "$rootPath/ex/$dir/$f"
     done
     cd ..
