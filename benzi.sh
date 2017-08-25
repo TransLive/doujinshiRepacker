@@ -80,7 +80,7 @@ function rarExt()
 
 
 # TODO:check the version of rename
-password="扶她奶茶"
+password="$1"
 rootPath=$(pwd)
 # check if ex exists
 if [ -d "$rootPath/ex" ];then
