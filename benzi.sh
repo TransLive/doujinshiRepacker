@@ -130,4 +130,5 @@ do
         zip -r "$rootPath/ex/$dir/$f".zip "$rootPath/ex/$dir/$f"
         rm -r "$rootPath/ex/$dir/$f"
     done
+    cd ..
 done
