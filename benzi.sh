@@ -26,7 +26,7 @@ function rarType()
             fi
         fi
         #type2: rar with folders in
-        if [ test -d "$f" ];then
+        if [ -d "$f" ];then
             return 2
         fi
             
@@ -38,25 +38,49 @@ function rarType()
 function rarExt()
 {
     rootPath="$1"
-    d="$3"
+    rars="$2"
+    rarDir="$3"
     password="$4"
     if [ -z "$rars" ];then 
         return 
     fi
 
-    for r in $rars
+    for rar in $rars
     do
-
-        extTmpDir=${r%.rar}
+        #make a dir in current dir uses rar's name
+        extTmpDir=${rar%.rar}
         if [ ! -d "$extTmpDir" ]; then
             mkdir "$extTmpDir"
         fi
-        
-        unrar e -p"$password" "$r" "$extTmpDir"
+
+        unrar e -p"$password" "$rar" "$extTmpDir"
         rarType "$extTmpDir"
         _rarType=$?
         echo $_rarType
-        rm -r $extTmpDir
+        #rm -r $extTmpDir
+        #final step
+
+        #type0: rar with rars in.extract to here,add all new rars' dir into $rars
+        case $_rarType in 
+        0)
+        echo haha
+        echo "$extTmpDir"
+        echo haha
+        $childRars=$(find "$extTmpDir" -name "*.rar")
+        echo $childRars
+        rm -r "$rootPath/ex"
+        exit
+        #rarExt "" "$childRars" "" ""
+        ;;
+        #type1: rar with jpgs in
+        1)
+        mv "$extTmpDir" "$rootPath/ex/$rarDir"
+        ;;
+        #type2: rar with folder in.immediately extract to final dir
+        2)
+
+        ;;
+        esac
     #exit
         #unrar x -p$password "$r" "$rootPath/tmp"
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
@@ -70,7 +94,7 @@ function rarExt()
         # elif [ rarType==1 ];then
 
         # fi
-        # #type2: rar with folder in.immediately extract to final dir
+        # 
         # elif [ rarType==2 ];then
         #     mkdir "$rootPath/ex/$d/$r"
         #     unrar x -p"$1" "$rootPath/ex/$d/$r"
@@ -93,21 +117,22 @@ else
 fi
 #take off all space chars from file/dir names
 rename 's/ /_/g' *
-#mkdir tmp
 
-for d in $rarDirs 
+#get into dirs one by one 
+for rarDir in $rarDirs 
 do
     #echo "$d"
-    #get into dirs one by one 
-    if [ -d "$d" ]; then
-        cd "$(pwd)/$d" 
-        if [ ! -d "$rootPath/ex/$d" ];
+    #make final dirs store the folders
+    if [ -d "$rarDir" ]; then
+        cd "$(pwd)/$rarDir" 
+        if [ ! -d "$rootPath/ex/$rarDir" ];
         then
-            mkdir "$rootPath/ex/$d"
+            mkdir "$rootPath/ex/$rarDir"
         fi       
-        rars=$(find "$(pwd)" -name "*.rar")
-        rarExt  "$rootPath" "$rars" "$d" "$password"
         
+        rars=$(find "$(pwd)" -name "*.rar")
+        rarExt  "$rootPath" "$rars" "$rarDir" "$password"
+
         # back to root dir
         cd ..
     fi
