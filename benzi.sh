@@ -57,9 +57,8 @@ function rarExt()
         rarType "$extTmpDir"
         _rarType=$?
         echo $_rarType
-        #rm -r $extTmpDir
+        
         #final step
-
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
         case $_rarType in 
         0)
@@ -98,7 +97,6 @@ rename 's/ /_/g' *
 #get into dirs one by one 
 for rarDir in $rarDirs 
 do
-    #echo "$d"
     #make final dirs store the folders
     if [ -d "$rarDir" ]; then
         cd "$(pwd)/$rarDir" 
@@ -114,8 +112,6 @@ do
         cd ..
     fi
 done
-
-exit
 
 cd ex
 rename 's/ /_/g'
