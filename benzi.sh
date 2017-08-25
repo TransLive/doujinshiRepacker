@@ -18,7 +18,7 @@ function rarType()
             fi
         fi
         #type1: rar with jpgs in
-        echo $f | grep .jpg
+        echo $f | grep -E ".jpg|.png"
         if [ $? -eq 0 ];then
             i=$(expr $i + 1)
             if [ $i -ge 5 ];then
@@ -63,14 +63,9 @@ function rarExt()
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
         case $_rarType in 
         0)
-        echo haha
-        echo "$extTmpDir"
-        echo haha
-        $childRars=$(find "$extTmpDir" -name "*.rar")
-        echo $childRars
-        rm -r "$rootPath/ex"
-        exit
-        #rarExt "" "$childRars" "" ""
+        childRars=$(find "$extTmpDir" -name "*.rar")
+        rarExt "$rootPath" "$childRars" "$rarDir" "$password"
+        rm -r "${extTmpDir%/*}"
         ;;
         #type1: rar with jpgs in
         1)
@@ -78,27 +73,9 @@ function rarExt()
         ;;
         #type2: rar with folder in.immediately extract to final dir
         2)
-
+        mv "$extTmpDir" "$rootPath/ex/$rarDir"
         ;;
         esac
-    #exit
-        #unrar x -p$password "$r" "$rootPath/tmp"
-        #type0: rar with rars in.extract to here,add all new rars' dir into $rars
-        # if [ _rarType -eq 0 ];
-        # then
-        #     rName=$(basename $r)
-            
-        #     echo ----------------------------
-        # fi
-        #type1: rar with jpgs in
-        # elif [ rarType==1 ];then
-
-        # fi
-        # 
-        # elif [ rarType==2 ];then
-        #     mkdir "$rootPath/ex/$d/$r"
-        #     unrar x -p"$1" "$rootPath/ex/$d/$r"
-        # fi
     done
 }
 
@@ -129,11 +106,28 @@ do
         then
             mkdir "$rootPath/ex/$rarDir"
         fi       
-        
+        #
         rars=$(find "$(pwd)" -name "*.rar")
         rarExt  "$rootPath" "$rars" "$rarDir" "$password"
 
         # back to root dir
         cd ..
     fi
+done
+
+exit
+
+cd ex
+rename 's/ /_/g'
+DIRS=$(ls ./)
+for dir in $DIRS
+do
+    cd "$rootPath/ex/$dir"
+    FILE=$(ls ./)
+    for f in $FILE
+    do
+        echo $f
+        zip -r "$rootPath/ex/$dir/$f".zip "$rootPath/ex/$dir/$f"
+        rm -r "$rootPath/ex/$dir/$f"
+    done
 done
