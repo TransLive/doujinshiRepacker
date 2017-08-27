@@ -2,11 +2,8 @@
 #put this script into root directory of mangas
 function rarType()
 {  
-    
-    rename 's/ /_/g' $1/*
-    files=$(ls $1)
-
-    i=0
+    local files=$(ls $1)
+    local i=0
     for f in $files
     do
         #type0: rar with rars in
@@ -31,56 +28,76 @@ function rarType()
         fi
             
     done
-    
-    
 }
 
 function rarExt()
 {
-    rootPath="$1"
-    rars="$2"
-    rarDir="$3"
-    password="$4"
+    local rootPath="$1"
+    local rars="$2"
+    local rarDir="$3"
+    local password="$4"
+    local delFlag="$5"
+    t=0
     if [ -z "$rars" ];then 
         return 
     fi
-
+    local rar
     for rar in $rars
     do
         #make a dir in current dir uses rar's name
+        local extTmpDir
         extTmpDir=${rar%.rar}
         if [ ! -d "$extTmpDir" ]; then
             mkdir "$extTmpDir"
         fi
-
-        unrar e -p"$password" "$rar" "$extTmpDir"
+        unrar e -y  -p"$password" "$rar" "$extTmpDir"
+        rename 's/ /_/g' $extTmpDir/*
+        if [ "$delFlag" -eq 0 ];then
+            rm $rar
+        fi
+        
         rarType "$extTmpDir"
-        _rarType=$?
+        local _rarType=$?
         echo $_rarType
 
         #final step
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
         case $_rarType in 
         0)
-        childRars=$(find "$extTmpDir" -name "*.rar")
-        rarExt "$rootPath" "$childRars" "$rarDir" "$password"
-        rm -r "${extTmpDir%/*}"
+            local childRars=$(find "$extTmpDir" -name "*.rar")
+            rarExt "$rootPath" "$childRars" "$rarDir" "$password" "0"
+            delFlag=1
         ;;
         #type1: rar with jpgs in
         1)
-        mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            mv "$extTmpDir" "$rootPath/ex/$rarDir"
         ;;
         #type2: rar with folder in.immediately extract to final dir
         2)
-        mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            mv "$extTmpDir" "$rootPath/ex/$rarDir"
         ;;
         esac
+
+        #delet tmp folder
+        if [ -d "${rar%.rar*}" ];then 
+            rm -r ${rar%.rar*}
+            continue
+        fi
+
+        #repack
+        cd "$rootPath/ex/$rarDir"
+            zip -r "${extTmpDir##*/}".zip "${extTmpDir##*/}"
+            rm -r "./${extTmpDir##*/}"
+        cd -
     done
 }
 
-
 # TODO:check the version of rename
 password="$1"
+until [ ! -z $password ]
+do
+    read -p "此处输入密码：" password
+done
 rootPath=$(pwd)
 # check if ex exists
 if [ -d "$rootPath/ex" ];then
@@ -106,25 +123,8 @@ do
         fi       
         #
         rars=$(find "$(pwd)" -name "*.rar")
-        rarExt  "$rootPath" "$rars" "$rarDir" "$password"
-
+        rarExt  "$rootPath" "$rars" "$rarDir" "$password" "1"
         # back to root dir
         cd ..
     fi
-done
-
-cd ex
-rename 's/ /_/g'
-DIRS=$(ls ./)
-for dir in $DIRS
-do
-    cd "$rootPath/ex/$dir"
-    FILE=$(ls ./)
-    for f in $FILE
-    do
-        echo $f
-        zip -r "$f".zip "$f"
-        rm -r "$rootPath/ex/$dir/$f"
-    done
-    cd ..
 done
