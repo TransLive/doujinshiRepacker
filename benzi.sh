@@ -86,8 +86,12 @@ function rarExt()
 
         #repack
         cd "$rootPath/ex/$rarDir"
+            ( 
             zip -r "${extTmpDir##*/}".zip "${extTmpDir##*/}"
-            rm -r "./${extTmpDir##*/}"
+            if [ -d "./${extTmpDir##*/}" ];then
+                rm -r "./${extTmpDir##*/}"
+            fi
+            ) &
         cd -
     done
 }
@@ -128,3 +132,4 @@ do
         cd ..
     fi
 done
+exit
