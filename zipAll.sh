@@ -3,5 +3,6 @@ rename 's/ /_/g' *
 zipDirs=$(ls -F | grep "/$")
 for dir in $zipDirs
 do
-  zip -r "$dir".zip "$dir"
+  zip -r "${dir%/*}.zip" "$dir"
+  rm -r "$dir"
 done
