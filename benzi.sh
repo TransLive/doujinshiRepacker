@@ -26,7 +26,6 @@ function rarType()
         if [ -d "$f" ];then
             return 2
         fi
-            
     done
 }
 
@@ -62,22 +61,27 @@ function rarExt()
 
         #final step
         #type0: rar with rars in.extract to here,add all new rars' dir into $rars
-        case $_rarType in 
-        0)
-            local childRars=$(find "$extTmpDir" -name "*.rar")
-            rarExt "$rootPath" "$childRars" "$rarDir" "$password" "0"
-            delFlag=1
-        ;;
-        #type1: rar with jpgs in
-        1)
-            mv "$extTmpDir" "$rootPath/ex/$rarDir"
-        ;;
-        #type2: rar with folder in.immediately extract to final dir
-        2)
-            mv "$extTmpDir" "$rootPath/ex/$rarDir"
-        ;;
-        esac
-
+        # until [[ _rarType != 2]]
+        # do
+            case $_rarType in 
+            0)
+                local childRars=$(find "$extTmpDir" -name "*.rar")
+                rarExt "$rootPath" "$childRars" "$rarDir" "$password" "0"
+                delFlag=1
+            ;;
+            #type1: rar with jpgs in
+            1)
+                mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            ;;
+            #type2: rar with folder in.immediately extract to final dir
+            2)
+                #check folders' type until type is not 2
+                # rarType "extTmpDir"
+                # _rarType=$?
+                mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            ;;
+            esac
+        # done
         #delet tmp folder
         if [ -d "${rar%.rar*}" ];then 
             rm -r ${rar%.rar*}
