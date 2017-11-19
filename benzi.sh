@@ -97,6 +97,7 @@ function rarExt()
 }
 
 # TODO:check the version of rename
+
 password="$1"
 until [ ! -z $password ]
 do
@@ -104,6 +105,9 @@ do
 done
 rootPath=$(pwd)
 # check if ex exists
+#take off all space chars from file/dir names
+rename 's/ /_/g' *
+
 if [ -d "$rootPath/ex" ];then
     rm -r ex
     rarDirs=$(ls -F | grep "/$")
@@ -112,8 +116,7 @@ else
     rarDirs=$(ls -F | grep "/$")
     mkdir ex
 fi
-#take off all space chars from file/dir names
-rename 's/ /_/g' *
+
 
 #get into dirs one by one 
 for rarDir in $rarDirs 
