@@ -72,9 +72,16 @@ function rarExt()
         1)
             mv "$extTmpDir" "$rootPath/ex/$rarDir"
         ;;
-        #type2: rar with folder in.immediately extract to final dir
+        #type2: rar with folders in.immediately extract to final dir
         2)
-            mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            cd "$extTmpDir"
+            local extTmpDirs=$(ls -F | grep "/$")
+            for d in $extTmpDirs
+            do
+                rarType "$d"
+                mv "$extTmpDir" "$rootPath/ex/$rarDir"
+            done
+            cd -
         ;;
         esac
 
@@ -97,17 +104,13 @@ function rarExt()
 }
 
 # TODO:check the version of rename
-
 password="$1"
-until [ ! -z $password ]
-do
+# until [ ! -z $password ]
+# do
     read -p "此处输入密码：" password
-done
+# done
 rootPath=$(pwd)
 # check if ex exists
-#take off all space chars from file/dir names
-rename 's/ /_/g' *
-
 if [ -d "$rootPath/ex" ];then
     rm -r ex
     rarDirs=$(ls -F | grep "/$")
@@ -116,11 +119,15 @@ else
     rarDirs=$(ls -F | grep "/$")
     mkdir ex
 fi
-
+#take off all space chars from file/dir names
+rename 's/ /_/g' *
 
 #get into dirs one by one 
 for rarDir in $rarDirs 
 do
+    cd $rarDirs
+    rename 's/ /_/g' *
+    cd -
     #make final dirs store the folders
     if [ -d "$rarDir" ]; then
         cd "$(pwd)/$rarDir" 
